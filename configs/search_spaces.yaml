@@ -1,0 +1,99 @@
+# Authoritative machine-readable non-neural HPO search spaces for this release.
+#
+# These spaces are the single source used by the executable manuscript-HPO path.
+# They implement the selection protocol stated in Section 3.6/Table 3(a): 50
+# Optuna trials for LightGBM/XGBoost/CatBoost, four logistic-regression grid
+# configurations, and 18 random-forest grid configurations, selected by macro-F1
+# on the internal class-stratified 15% split.  The reported Table 3(a) final
+# blind-well configurations are explicitly contained in the corresponding spaces.
+# No alternative hidden/default search space is used by the release pipeline.
+search_protocol:
+  lightgbm:
+    engine: optuna
+    trials_per_outer_fold: 50
+    available: true
+    role: manuscript_release_search_space
+    space:
+      - {name: n_estimators, type: categorical, choices: [300, 400, 500, 600, 700]}
+      - {name: max_depth, type: categorical, choices: [4, 5, 6, 7, 8]}
+      - {name: learning_rate, type: categorical, choices: [0.02, 0.035, 0.05, 0.075, 0.1]}
+      - {name: bagging_freq, type: categorical, choices: [0]}
+
+  xgboost:
+    engine: optuna
+    trials_per_outer_fold: 50
+    available: true
+    role: manuscript_release_search_space
+    space:
+      - {name: n_estimators, type: int, low: 300, high: 600, step: 1}
+      - {name: max_depth, type: int, low: 3, high: 6, step: 1}
+      - {name: learning_rate, type: float, low: 0.02, high: 0.08, step: 0.001}
+      - {name: subsample, type: float, low: 0.70, high: 0.90, step: 0.01}
+      - {name: colsample_bytree, type: float, low: 0.70, high: 0.90, step: 0.01}
+      - {name: min_child_weight, type: int, low: 1, high: 6, step: 1}
+      - {name: gamma, type: float, low: 0.00, high: 0.10, step: 0.01}
+      - {name: reg_alpha, type: float, low: 0.000, high: 0.050, step: 0.001}
+      - {name: reg_lambda, type: float, low: 1.00, high: 2.00, step: 0.01}
+
+  catboost:
+    engine: optuna
+    trials_per_outer_fold: 50
+    available: true
+    role: manuscript_release_search_space
+    space:
+      - {name: iterations, type: int, low: 400, high: 700, step: 1}
+      - {name: depth, type: int, low: 4, high: 8, step: 1}
+      - {name: learning_rate, type: float, low: 0.02, high: 0.08, step: 0.001}
+      - {name: l2_leaf_reg, type: float, low: 1.0, high: 8.0, step: 0.1}
+      - {name: random_strength, type: float, low: 0.0, high: 1.0, step: 0.01}
+      - {name: bagging_temperature, type: float, low: 0.0, high: 1.0, step: 0.01}
+      - {name: border_count, type: categorical, choices: [64, 128, 254]}
+      - {name: class_weights, type: categorical, choices: [balanced]}
+
+  multinomial_logistic_regression:
+    engine: grid
+    n_configurations: 4
+    available: true
+    role: manuscript_release_search_space
+    space:
+      - {C: 0.01, penalty: l2, class_weight: balanced}
+      - {C: 0.1, penalty: l2, class_weight: balanced}
+      - {C: 1.0, penalty: l2, class_weight: balanced}
+      - {C: 10.0, penalty: l2, class_weight: balanced}
+
+  random_forest:
+    engine: grid
+    n_configurations: 18
+    available: true
+    role: manuscript_release_search_space
+    # 3 n_estimators x 3 max_depth x 2 max_features = 18 configurations.
+    space:
+      - {n_estimators: 300, max_depth: 8,  max_features: sqrt, class_weight: balanced}
+      - {n_estimators: 300, max_depth: 8,  max_features: 0.3, class_weight: balanced}
+      - {n_estimators: 300, max_depth: 12, max_features: sqrt, class_weight: balanced}
+      - {n_estimators: 300, max_depth: 12, max_features: 0.3, class_weight: balanced}
+      - {n_estimators: 300, max_depth: 16, max_features: sqrt, class_weight: balanced}
+      - {n_estimators: 300, max_depth: 16, max_features: 0.3, class_weight: balanced}
+      - {n_estimators: 500, max_depth: 8,  max_features: sqrt, class_weight: balanced}
+      - {n_estimators: 500, max_depth: 8,  max_features: 0.3, class_weight: balanced}
+      - {n_estimators: 500, max_depth: 12, max_features: sqrt, class_weight: balanced}
+      - {n_estimators: 500, max_depth: 12, max_features: 0.3, class_weight: balanced}
+      - {n_estimators: 500, max_depth: 16, max_features: sqrt, class_weight: balanced}
+      - {n_estimators: 500, max_depth: 16, max_features: 0.3, class_weight: balanced}
+      - {n_estimators: 700, max_depth: 8,  max_features: sqrt, class_weight: balanced}
+      - {n_estimators: 700, max_depth: 8,  max_features: 0.3, class_weight: balanced}
+      - {n_estimators: 700, max_depth: 12, max_features: sqrt, class_weight: balanced}
+      - {n_estimators: 700, max_depth: 12, max_features: 0.3, class_weight: balanced}
+      - {n_estimators: 700, max_depth: 16, max_features: sqrt, class_weight: balanced}
+      - {n_estimators: 700, max_depth: 16, max_features: 0.3, class_weight: balanced}
+
+selection_metric: macro_f1
+selection_split: internal_15_percent_stratified
+final_non_neural_protocol: tune_on_712_then_refit_on_all_712
+capacity_scan:
+  status: post_hoc_not_for_model_selection
+  one_factor_at_a_time: true
+  L: [2, 4, 6]
+  d_group: [32, 48, 64]
+  dropout: [0.0, 0.12, 0.3]
+  n_distinct_configurations: 7

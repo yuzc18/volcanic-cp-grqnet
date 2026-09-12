@@ -1,0 +1,62 @@
+model_comparison:
+  primary_unit: well
+  paired_per_well_t_interval:
+    n_wells: 5
+    confidence: 0.95
+    approximate_due_to_overlapping_outer_training_sets: true
+  moving_block_bootstrap:
+    stratify_by_well: true
+    paired: true
+    block_length_m: 2.0
+    n_resamples: 2000
+    refit_models_each_replicate: false
+
+coverage:
+  binomial_reference_interval: clopper_pearson
+  blind_within_well_moving_block_bootstrap:
+    block_length_m: 2.0
+    n_resamples: 1000
+
+thinning:
+  retrain: false
+  within_well_sort: ascending_depth
+  minimum_spacing_m: [0.5, 1.0]
+  starting_choices: [first_sample, second_sample]
+  aggregate_over_starting_choices: mean
+
+ace:
+  alpha_grid:
+    start: 0.01
+    stop: 0.30
+    step: 0.01
+    n_points: 30
+  definition: mean_absolute_empirical_coverage_minus_nominal
+
+figure8:
+  source: primary_seed_out_of_fold_prediction_sets
+  seed: 20260827
+  displayed_nominal_levels: 9
+  alpha_primary: 0.05
+  annotations_must_be_computed_from_input_data: true
+
+figure12:
+  source: primary_seed_out_of_fold_predictions
+  seed: 20260827
+  random_engine: numpy_default_rng
+  strategies:
+    cp_guided:
+      order: prediction_set_size_descending
+      tie_breaking: random
+      random_draws: 200
+    softmax:
+      order: maximum_probability_ascending
+    uniform_random:
+      random_draws: 200
+  moving_block_bootstrap:
+    stratify_by_well: true
+    paired: true
+    block_length_m: 2.0
+    n_resamples: 1000
+    rebuild_rankings_each_replicate: true
+    redraw_random_steps_each_replicate: true
+    refit_models_each_replicate: false

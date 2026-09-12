@@ -1,0 +1,44 @@
+labels:
+  rqi_constant: 0.0314
+  formulas:
+    rqi: "0.0314 * sqrt(K_mD / phi_decimal)"
+    phi_z: "phi_decimal / (1 - phi_decimal)"
+    fzi: "RQI / phi_z"
+  clustering_variable: log10_fzi
+  kmeans:
+    n_clusters: 3
+    init: k-means++
+    n_init: 10
+    max_iter: 300
+    tol: 1.0e-4
+    random_state: 42
+    fit_scope: 890_development_samples_once
+  frozen_boundaries_um: [0.7018, 1.0549]
+  boundary_tie_rule: assign_to_higher_quality_class
+  class_order: [High, Medium, Low]
+
+label_stability:
+  n_repeats: 50
+  kmeans_n_init: 1
+  initialization: k-means++
+  distinct_random_seeds: true
+  matching: hungarian_optimal_assignment
+  stable_threshold: 0.95
+  minimum_agreements_of_50: 48
+
+boundary_bootstrap:
+  n_resamples: 1000
+  resample_scope: 890_development_samples_independently_with_replacement
+  kmeans_n_init_each_replicate: 10
+  within_well_dependence_accounted: false
+
+alternative_labels:
+  - method: kmeans
+    n_clusters: 2
+  - method: kmeans
+    n_clusters: 4
+  - method: kmedoids
+    n_clusters: 3
+    metric: manhattan
+    init: k-medoids++
+    random_state: 42

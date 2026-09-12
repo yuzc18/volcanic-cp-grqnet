@@ -1,0 +1,62 @@
+uft:
+  total_dimensions: 50
+  group_a:
+    dimensions: 5
+    columns: [GR, CNL, DEN, AC, RLA5]
+    source: raw_lwd_current_depth
+    sigma_clip: 3.0
+    scaler: robust_median_iqr
+  group_b:
+    dimensions: 18
+    columns:
+      - LithProb_0
+      - LithProb_1
+      - LithProb_2
+      - LithProb_3
+      - LithProb_4
+      - LithProb_5
+      - LithProb_6
+      - LithProb_7
+      - LithProb_8
+      - LithProb_9
+      - LithProb_10
+      - LithProb_11
+      - LithProb_12
+      - LithProb_13
+      - LithProb_14
+      - LithProb_15
+      - LithProb_16
+      - LithProb_17
+    scaler: none
+  group_c:
+    dimensions: 2
+    columns: [predicted_porosity, predicted_log10_permeability]
+    scaler: robust_median_iqr_per_feature
+  group_d:
+    dimensions: 25
+    base_columns: [GR, CNL, DEN, AC, RLA5]
+    statistics: [prev1, next1, mean3, std3, diff1]
+    source_sequence: continuous_lwd_grid_before_core_matching
+    sigma_clip_before_window: 3.0
+    std_ddof: 1
+    boundary_padding: none
+    centered_window:
+      prev1: "x(i-1)"
+      next1: "x(i+1)"
+      mean3: "mean{x(i-1), x(i), x(i+1)}"
+      std3: "sample_std_ddof1{x(i-1), x(i), x(i+1)}"
+      diff1: "x(i)-x(i-1)"
+    strictly_causal_variant:
+      prev1: "x(i-1)"
+      next1_replacement: "x(i-2)"
+      mean3: "mean{x(i-2), x(i-1), x(i)}"
+      std3: "sample_std_ddof1{x(i-2), x(i-1), x(i)}"
+      diff1: "x(i)-x(i-1)"
+    scaler: robust_median_iqr
+
+preprocessing:
+  upstream_erf_input: original_raw_5_curves
+  upstream_xgb_input: original_raw_5_curves
+  group_a_input: three_sigma_clipped_copy
+  group_d_input: three_sigma_clipped_continuous_sequence
+  fit_scalers_on: classifier_training_subset_only

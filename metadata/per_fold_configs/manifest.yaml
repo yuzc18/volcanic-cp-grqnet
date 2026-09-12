@@ -1,0 +1,23 @@
+schema_version: 2
+producer: scripts/run_baselines.py
+output_path: outputs/baselines/per_fold_configurations.csv
+source_of_selected_values: actual_fold_specific_hpo_run
+selection_metric: macro_f1
+selection_split: internal_15_percent_stratified
+primary_seed: 20260827
+outer_folds:
+  - {fold: 1, validation_well: WF1}
+  - {fold: 2, validation_well: CS12}
+  - {fold: 3, validation_well: CS602}
+  - {fold: 4, validation_well: CS607}
+  - {fold: 5, validation_well: CS11}
+models:
+  lightgbm: {engine: optuna, trials_per_outer_fold: 50}
+  multinomial_logistic_regression: {engine: grid, n_configurations: 4}
+  random_forest: {engine: grid, n_configurations: 18}
+  xgboost: {engine: optuna, trials_per_outer_fold: 50}
+  catboost: {engine: optuna, trials_per_outer_fold: 50}
+final_model:
+  tuning_subset_n: 712
+  internal_selection_fraction: 0.15
+  refit_on_all_712: true

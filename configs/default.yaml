@@ -1,0 +1,112 @@
+# Backward-compatible aggregate configuration used by the pre-revision code.
+# Canonical paper-facing configuration is split across the other YAML files in
+# this directory. Round 3 has migrated split orchestration and the main GRQ-Net training driver; later rounds finalize baselines, CP, statistics, and figures.
+seed:
+  global: 20260827
+  kmeans: 42
+  kmeans_stability_n: 50
+  xgb_oof: 20260827
+  cv_folds: [20260827, 20260827, 20260827, 20260827, 20260827]
+  cp_split: 20260827
+  bootstrap: 20260827
+  bootstrap_n_resamples: 1000
+
+determinism:
+  torch_deterministic: true
+  cudnn_benchmark: false
+  cudnn_deterministic: true
+
+labels:
+  rqi_constant: 0.0314
+  kmeans_n_clusters: 3
+  kmeans_n_init: 10
+  kmeans_max_iter: 300
+  kmeans_tol: 1.0e-4
+  frozen_boundaries_um: [0.7018, 1.0549]
+  class_names: [High, Medium, Low]
+  class_ids: {High: 0, Medium: 1, Low: 2}
+
+uft:
+  group_a:
+    columns: [GR, CNL, DEN, AC, RLA5]
+    preprocessing: {sigma_truncation: 3.0, scaler: robust}
+  group_b:
+    columns: [LithProb_0, LithProb_1, LithProb_2, LithProb_3, LithProb_4, LithProb_5, LithProb_6, LithProb_7, LithProb_8, LithProb_9, LithProb_10, LithProb_11, LithProb_12, LithProb_13, LithProb_14, LithProb_15, LithProb_16, LithProb_17]
+    preprocessing: {scaler: none}
+  group_c:
+    columns: [predicted_porosity, predicted_log10_permeability]
+    preprocessing:
+      predicted_porosity: {scaler: robust}
+      predicted_log10_permeability: {scaler: robust}
+  group_d:
+    base_columns: [GR, CNL, DEN, AC, RLA5]
+    statistics: [prev1, next1, mean3, std3, diff1]
+    window_size: 3
+    edge_padding: none
+    std_ddof: 1
+    preprocessing: {sigma_truncation: 3.0, scaler: robust}
+  total_dimensions: 50
+
+group_c_regressor:
+  type: xgboost
+  targets:
+    phi: porosity_pct
+    log_K: log10_permeability_mD
+  xgb_params:
+    n_estimators: 300
+    max_depth: 4
+    learning_rate: 0.05
+    subsample: 0.8
+    colsample_bytree: 0.8
+    random_state: 20260827
+    n_jobs: 1
+    tree_method: hist
+    verbosity: 0
+
+grqnet:
+  d_group: 48
+  attention_hidden: 32
+  n_residual_blocks: 4
+  d_model: 192
+  classification_head_hidden: 64
+  dropout: 0.12
+  expected_param_count: 319815
+
+training:
+  loss: {type: weighted_cross_entropy, label_smoothing: 0.05, class_weighting: inverse_freq}
+  optimizer: {type: AdamW, lr: 8.0e-4, weight_decay: 5.0e-3}
+  scheduler: {type: CosineAnnealingWarmRestarts, T_0: 30, T_mult: 2}
+  grad_clip_max_norm: 1.0
+  batch_size: 48
+  max_epochs: 200
+  early_stop: {monitor: val_macro_f1, patience: 30, mode: max, internal_fraction: 0.15}
+
+data_partition:
+  cv: {n_folds: 5, type: leave_one_development_well_out}
+  cp_calibration:
+    n_samples: 178
+    n_train_for_cv: 712
+    stratify_by: [well, quality_class]
+    seed: 20260827
+  blind: {wells: [CS9, CS10], n_total: 369}
+
+conformal:
+  method: APS
+  alpha: 0.05
+  randomized: true
+  seed: 20260827
+  always_retain_top_class: true
+
+baselines:
+  gbm: {library: lightgbm, n_estimators: 500, max_depth: 6, learning_rate: 0.05, bagging_freq: 0, optuna_trials: 50}
+  mlp: {hidden_dims: [128, 96, 64], activation: relu, dropout: 0.3}
+  lstm: {hidden_size: 64, n_layers: 2, dropout: 0.3}
+  transformer: {d_model: 64, n_heads: 4, n_encoder_layers: 3, d_ff: 256}
+  tabnet: {n_steps: 4, n_a: 32, n_d: 32, relaxation: 1.5}
+
+budget_analysis:
+  strategies: [cp_guided, softmax_threshold, uniform_random]
+  random_draws: 200
+  ci: 0.95
+  n_bootstrap: 1000
+  seed: 20260827

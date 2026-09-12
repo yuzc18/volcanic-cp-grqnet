@@ -1,0 +1,22 @@
+benchmark:
+  reference_environment:
+    cpu: Intel Core i7-13700H
+    cores_used: 1
+    os: Windows 11
+    python: 3.11.9
+    pytorch: 2.3.1
+    pytorch_build: cpu
+    batch_size: 1
+    library_threads: 1
+  group_d_variant: strictly_causal
+  warmup_iterations: 100
+  measured_iterations: 1000
+  summary_statistics: [median_ms, p95_ms, throughput_samples_per_second]
+  total_timing: measured_complete_iteration_not_sum_of_stage_medians
+  stages:
+    - input_preparation_three_sigma_clipping_for_A_D
+    - erf_18_class_lithology
+    - xgboost_regressors_x2
+    - group_d_uft_and_frozen_robust_scaling
+    - grqnet
+    - conformal_set_construction

@@ -1,0 +1,51 @@
+feature_index,feature_name,group,definition,unit,window,strictly_causal_in_centered_variant,strictly_causal_variant_definition,preprocessing
+0,GR,A,raw LWD response at current depth,API,current depth,yes,none,3-sigma clipped copy; robust median/IQR scaling
+1,CNL,A,raw LWD response at current depth,%,current depth,yes,none,3-sigma clipped copy; robust median/IQR scaling
+2,DEN,A,raw LWD response at current depth,g/cm^3,current depth,yes,none,3-sigma clipped copy; robust median/IQR scaling
+3,AC,A,raw LWD response at current depth,us/ft,current depth,yes,none,3-sigma clipped copy; robust median/IQR scaling
+4,RLA5,A,raw LWD response at current depth,ohm*m,current depth,yes,none,3-sigma clipped copy; robust median/IQR scaling
+5,LithProb_0,B,eRF probability for Basalt,probability,current depth,yes,none,no scaling; upstream eRF fitted without active calibration/evaluation rows
+6,LithProb_1,B,eRF probability for Andesite,probability,current depth,yes,none,no scaling; upstream eRF fitted without active calibration/evaluation rows
+7,LithProb_2,B,eRF probability for Rhyolite,probability,current depth,yes,none,no scaling; upstream eRF fitted without active calibration/evaluation rows
+8,LithProb_3,B,eRF probability for Andesitic volcanic breccia,probability,current depth,yes,none,no scaling; upstream eRF fitted without active calibration/evaluation rows
+9,LithProb_4,B,eRF probability for Andesitic brecciated lava,probability,current depth,yes,none,no scaling; upstream eRF fitted without active calibration/evaluation rows
+10,LithProb_5,B,eRF probability for Andesitic tuff lava,probability,current depth,yes,none,no scaling; upstream eRF fitted without active calibration/evaluation rows
+11,LithProb_6,B,eRF probability for Andesitic tuff,probability,current depth,yes,none,no scaling; upstream eRF fitted without active calibration/evaluation rows
+12,LithProb_7,B,eRF probability for Rhyolitic brecciated lava,probability,current depth,yes,none,no scaling; upstream eRF fitted without active calibration/evaluation rows
+13,LithProb_8,B,eRF probability for Rhyolitic tuff lava,probability,current depth,yes,none,no scaling; upstream eRF fitted without active calibration/evaluation rows
+14,LithProb_9,B,eRF probability for Rhyolitic volcanic breccia,probability,current depth,yes,none,no scaling; upstream eRF fitted without active calibration/evaluation rows
+15,LithProb_10,B,eRF probability for Rhyolitic tuff,probability,current depth,yes,none,no scaling; upstream eRF fitted without active calibration/evaluation rows
+16,LithProb_11,B,eRF probability for Sedimentary volcanic breccia,probability,current depth,yes,none,no scaling; upstream eRF fitted without active calibration/evaluation rows
+17,LithProb_12,B,eRF probability for Sedimentary tuff,probability,current depth,yes,none,no scaling; upstream eRF fitted without active calibration/evaluation rows
+18,LithProb_13,B,eRF probability for Trachytic brecciated lava,probability,current depth,yes,none,no scaling; upstream eRF fitted without active calibration/evaluation rows
+19,LithProb_14,B,eRF probability for Trachytic tuff lava,probability,current depth,yes,none,no scaling; upstream eRF fitted without active calibration/evaluation rows
+20,LithProb_15,B,eRF probability for Trachytic volcanic breccia,probability,current depth,yes,none,no scaling; upstream eRF fitted without active calibration/evaluation rows
+21,LithProb_16,B,eRF probability for Trachytic tuff,probability,current depth,yes,none,no scaling; upstream eRF fitted without active calibration/evaluation rows
+22,LithProb_17,B,eRF probability for Trachyte,probability,current depth,yes,none,no scaling; upstream eRF fitted without active calibration/evaluation rows
+23,predicted_porosity,C,XGBoost prediction of recorded core porosity,percentage points,current depth,yes,none,robust median/IQR scaling
+24,predicted_log10_permeability,C,XGBoost prediction of log10 permeability,log10(mD),current depth,yes,none,robust median/IQR scaling
+25,GR_prev1,D,GR(i-1),API,previous grid sample,yes,same,computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling
+26,GR_next1,D,GR(i+1),API,next grid sample,no,use GR(i-2),computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling
+27,GR_mean3,D,"mean(GR(i-1), GR(i), GR(i+1))",API,centered 3-point window,no,"mean(GR(i-2), GR(i-1), GR(i))",computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling
+28,GR_std3,D,"sample std, ddof=1, of GR(i-1), GR(i), GR(i+1)",API,centered 3-point window,no,"sample std, ddof=1, of GR(i-2), GR(i-1), GR(i)",computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling
+29,GR_diff1,D,GR(i)-GR(i-1),API,current and previous grid sample,yes,same,computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling
+30,CNL_prev1,D,CNL(i-1),%,previous grid sample,yes,same,computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling
+31,CNL_next1,D,CNL(i+1),%,next grid sample,no,use CNL(i-2),computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling
+32,CNL_mean3,D,"mean(CNL(i-1), CNL(i), CNL(i+1))",%,centered 3-point window,no,"mean(CNL(i-2), CNL(i-1), CNL(i))",computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling
+33,CNL_std3,D,"sample std, ddof=1, of CNL(i-1), CNL(i), CNL(i+1)",%,centered 3-point window,no,"sample std, ddof=1, of CNL(i-2), CNL(i-1), CNL(i)",computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling
+34,CNL_diff1,D,CNL(i)-CNL(i-1),%,current and previous grid sample,yes,same,computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling
+35,DEN_prev1,D,DEN(i-1),g/cm^3,previous grid sample,yes,same,computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling
+36,DEN_next1,D,DEN(i+1),g/cm^3,next grid sample,no,use DEN(i-2),computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling
+37,DEN_mean3,D,"mean(DEN(i-1), DEN(i), DEN(i+1))",g/cm^3,centered 3-point window,no,"mean(DEN(i-2), DEN(i-1), DEN(i))",computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling
+38,DEN_std3,D,"sample std, ddof=1, of DEN(i-1), DEN(i), DEN(i+1)",g/cm^3,centered 3-point window,no,"sample std, ddof=1, of DEN(i-2), DEN(i-1), DEN(i)",computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling
+39,DEN_diff1,D,DEN(i)-DEN(i-1),g/cm^3,current and previous grid sample,yes,same,computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling
+40,AC_prev1,D,AC(i-1),us/ft,previous grid sample,yes,same,computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling
+41,AC_next1,D,AC(i+1),us/ft,next grid sample,no,use AC(i-2),computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling
+42,AC_mean3,D,"mean(AC(i-1), AC(i), AC(i+1))",us/ft,centered 3-point window,no,"mean(AC(i-2), AC(i-1), AC(i))",computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling
+43,AC_std3,D,"sample std, ddof=1, of AC(i-1), AC(i), AC(i+1)",us/ft,centered 3-point window,no,"sample std, ddof=1, of AC(i-2), AC(i-1), AC(i)",computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling
+44,AC_diff1,D,AC(i)-AC(i-1),us/ft,current and previous grid sample,yes,same,computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling
+45,RLA5_prev1,D,RLA5(i-1),ohm*m,previous grid sample,yes,same,computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling
+46,RLA5_next1,D,RLA5(i+1),ohm*m,next grid sample,no,use RLA5(i-2),computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling
+47,RLA5_mean3,D,"mean(RLA5(i-1), RLA5(i), RLA5(i+1))",ohm*m,centered 3-point window,no,"mean(RLA5(i-2), RLA5(i-1), RLA5(i))",computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling
+48,RLA5_std3,D,"sample std, ddof=1, of RLA5(i-1), RLA5(i), RLA5(i+1)",ohm*m,centered 3-point window,no,"sample std, ddof=1, of RLA5(i-2), RLA5(i-1), RLA5(i)",computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling
+49,RLA5_diff1,D,RLA5(i)-RLA5(i-1),ohm*m,current and previous grid sample,yes,same,computed after 3-sigma clipping on continuous 0.125 m grid; robust median/IQR scaling

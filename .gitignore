@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Raw proprietary data (NEVER commit)
+data/raw/*
+!data/raw/.gitkeep
+
+# Synthetic data (regenerate via script)
+data/synthetic/*
+!data/synthetic/.gitkeep
+
+# Intermediate artifacts
+data/processed/
+data/interim/
+
+# Model checkpoints & training artifacts
+checkpoints/
+outputs/
+logs/
+runs/
+*.pt
+*.pth
+*.ckpt
+
+# Results, figures, tables
+results/
+figures/
+tables/
+
+# Optuna / HPO databases
+*.db

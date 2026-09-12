@@ -1,0 +1,84 @@
+# Group-B eRF protocol used to generate LithProb_0...LithProb_17.
+#
+# The current manuscript points to the published eRF method in reference [50].
+# This repository implements that published algorithmic specification directly
+# (z-score -> Borderline-SMOTE -> 300-tree C4.5 gain-ratio ensemble with
+# Kendall-W feature-stability guidance). It does not vendor the external
+# companion repository and does not invent selected values for low-level
+# hyperparameters that reference [50] did not report.
+erf:
+  output_dimensions: 18
+  preprocessing:
+    scaler: zscore
+    resampling: Borderline-SMOTE
+    resampling_scope: training_only
+  refit_complete_pipeline: true
+  exclusions:
+    always_exclude_wells: [CS9, CS10]
+    exclude_active_calibration_records: true
+    exclude_outer_validation_well: true
+  classifier_training_rows:
+    generation: inner_leave_one_well_out_cross_fitting
+
+  published_reference:
+    article_doi: 10.1371/journal.pone.0335630
+    code_repository: https://github.com/yuzc18/erf-volcanic-lithology
+    code_doi: 10.5281/zenodo.17121940
+    deployed_settings_explicitly_reported:
+      n_estimators: 300
+      sampling_method: Borderline-SMOTE
+      splitting_criterion: C4.5_gain_ratio
+      feature_consistency_screening: Kendall_W
+    inner_cv_search_spaces_reported_in_reference_50:
+      n_estimators: [100, 200, 300]
+      max_features: [sqrt, log2]
+      n_bins: [8, 16, 32]
+      borderline_smote:
+        k_neighbors: [3, 5, 7]
+        m_neighbors: [8, 10, 12]
+        kind: [borderline-1, borderline-2]
+      stability_subset:
+        MIN_TOPK: [6, 10]
+        MAX_TOPK: [16, 20]
+    selected_low_level_values_reported: false
+
+  manuscript_implementation:
+    n_estimators: 300
+    # Reference [50] reports these values as inner-CV candidates but not the
+    # selected low-level setting. The release uses the central/default choices
+    # below as a manuscript-consistent deterministic implementation.
+    max_features: sqrt
+    n_bins: 16
+    continuous_split_search: bounded_ordered_candidates
+    kendall_guidance: sequential_consensus_from_prior_tree_feature_rankings
+    borderline_smote_default:
+      k_neighbors: 5
+      m_neighbors: 10
+      kind: borderline-1
+    note: >-
+      Reference [50] reports the deployed high-level eRF components and the
+      inner-CV candidate spaces, but not the selected values of max_features,
+      n_bins, Borderline-SMOTE neighbour settings, or stability-subset limits.
+      The choices above are therefore explicit implementation details for the
+      runnable manuscript implementation and are not presented as recovered
+      historical settings.
+
+  class_order:
+    - Basalt
+    - Andesite
+    - Rhyolite
+    - Andesitic volcanic breccia
+    - Andesitic brecciated lava
+    - Andesitic tuff lava
+    - Andesitic tuff
+    - Rhyolitic brecciated lava
+    - Rhyolitic tuff lava
+    - Rhyolitic volcanic breccia
+    - Rhyolitic tuff
+    - Sedimentary volcanic breccia
+    - Sedimentary tuff
+    - Trachytic brecciated lava
+    - Trachytic tuff lava
+    - Trachytic volcanic breccia
+    - Trachytic tuff
+    - Trachyte

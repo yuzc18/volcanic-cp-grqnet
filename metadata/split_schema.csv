@@ -1,0 +1,3 @@
+field,type,status,description
+sample_id,string,Required,Anonymized sample identifier that must exactly match core_samples.csv::sample_id in the user-supplied/private dataset.
+is_main_calibration,boolean,Required,True for exactly 178 rows in the authoritative fixed main calibration subset; False otherwise.

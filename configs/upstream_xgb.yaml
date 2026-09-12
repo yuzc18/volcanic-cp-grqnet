@@ -1,0 +1,20 @@
+upstream_xgb:
+  models:
+    - name: porosity
+      target: porosity_pct
+      output: predicted_porosity
+    - name: log10_permeability
+      target_transform: log10
+      target: permeability_mD
+      output: predicted_log10_permeability
+  shared_params:
+    n_estimators: 300
+    max_depth: 4
+    learning_rate: 0.05
+    subsample: 0.8
+    colsample_bytree: 0.8
+  parameter_selection: fixed_a_priori
+  outer_fold_fit_scope: outer_training_rows_excluding_calibration
+  blind_fit_scope: 712_non_calibration_development_rows
+  classifier_training_rows:
+    generation: inner_leave_one_well_out_cross_fitting

@@ -1,0 +1,69 @@
+conformal:
+  method: randomized_APS
+  alpha_primary: 0.05
+  target_coverage_primary: 0.95
+  calibration_n_primary: 178
+  finite_sample_quantile:
+    order_statistic_formula: "ceil((n+1)*(1-alpha))"
+    primary_order_statistic: 171
+  prediction:
+    accumulate_classes_by_descending_probability: true
+    randomized_boundary_removal: true
+    always_retain_top_class: true
+    allow_empty_set: false
+  random_seed: 20260827
+  fold_specific_qhat_reference_range: [0.845, 0.881]
+  deployment_qhat_reference: 0.864
+
+alpha_sensitivity:
+  start: 0.01
+  stop: 0.30
+  step: 0.01
+  n_grid_points: 30
+  fitted_models_and_probabilities_fixed: true
+  recompute_qhat_for_each_alpha: true
+
+repeat_seed_policy:
+  manuscript_statement: "fixed seeds were used for repeated calibration-design sensitivity runs"
+  policy: "base_seed + repeat_index"
+  base_seed: 20260827
+  ten_seed_list: [20260827, 20260828, 20260829, 20260830, 20260831, 20260832, 20260833, 20260834, 20260835, 20260836]
+  five_seed_list: [20260827, 20260828, 20260829, 20260830, 20260831]
+
+calibration_designs:
+  stratified_fractions:
+    - fraction: 0.10
+      n_cal: 89
+      repeats: 10
+    - fraction: 0.15
+      n_cal: 134
+      repeats: 10
+    - fraction: 0.20
+      n_cal: 178
+      repeats: 10
+    - fraction: 0.25
+      n_cal: 223
+      repeats: 10
+  contiguous_depth_block:
+    fraction: 0.20
+    n_cal: 178
+    repeats: 5
+  whole_well:
+    - calibration_well: CS12
+      n_cal: 142
+      evaluation: blind_wells_combined
+    - calibration_well: CS607
+      n_cal: 156
+      evaluation: CS10
+    - calibration_well: WF1
+      n_cal: 160
+      evaluation: CS9
+  refit_for_each_design:
+    erf: true
+    xgboost_regressors: true
+    group_b: true
+    group_c: true
+    preprocessing: true
+    grqnet: true
+    qhat: true
+    fzi_boundaries: false

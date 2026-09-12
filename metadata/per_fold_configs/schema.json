@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "fields": {
+    "model": "baseline identifier",
+    "fold": "outer fold number 1-5 or final",
+    "validation_well": "held-out development well for outer folds",
+    "selection_engine": "optuna or grid",
+    "selection_metric": "macro_f1",
+    "internal_macro_f1": "score on the internal 15% selection split",
+    "selected_params": "JSON object of selected hyperparameters",
+    "seed": "random seed"
+  }
+}

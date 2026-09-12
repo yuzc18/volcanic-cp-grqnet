@@ -1,0 +1,58 @@
+# Well roster matching Table 1 of the current manuscript revision.
+training_wells:
+  - name: WF1
+    n_samples: 160
+    depth_min: 3089.0
+    depth_max: 3120.0
+    dominant_lithology: "Breccia-Tuff"
+    perm_min_mD: 0.002
+    perm_max_mD: 1.2
+  - name: CS12
+    n_samples: 142
+    depth_min: 2550.0
+    depth_max: 2700.0
+    dominant_lithology: "Breccia-Lava"
+    perm_min_mD: 0.003
+    perm_max_mD: 25.0
+  - name: CS602
+    n_samples: 258
+    depth_min: 2600.0
+    depth_max: 2680.0
+    dominant_lithology: "Breccia-Lava"
+    perm_min_mD: 0.003
+    perm_max_mD: 21.7
+  - name: CS607
+    n_samples: 156
+    depth_min: 2875.0
+    depth_max: 3005.0
+    dominant_lithology: "Lava"
+    perm_min_mD: 0.002
+    perm_max_mD: 2.6
+  - name: CS11
+    n_samples: 174
+    depth_min: 2520.0
+    depth_max: 2620.0
+    dominant_lithology: "Interbedded (Lava/Breccia/Tuff)"
+    perm_min_mD: 0.002
+    perm_max_mD: 10.7
+blind_wells:
+  - name: CS9
+    n_samples: 216
+    depth_min: 2240.0
+    depth_max: 2320.0
+    dominant_lithology: "Lava"
+    perm_min_mD: 0.002
+    perm_max_mD: 3.1
+  - name: CS10
+    n_samples: 153
+    depth_min: 2650.0
+    depth_max: 2810.0
+    dominant_lithology: "Breccia"
+    perm_min_mD: 0.002
+    perm_max_mD: 2.0
+totals:
+  training_samples: 890
+  blind_samples: 369
+  total_samples: 1259
+  n_training_wells: 5
+  n_blind_wells: 2

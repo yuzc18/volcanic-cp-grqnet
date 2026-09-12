@@ -1,0 +1,24 @@
+# Random-seed protocol for the revision implementation.
+# Manuscript: primary analysis seed 20260827; neural-network repeat seeds
+# 20260827, 20260828 and 20260829; FZI K-means random_state 42.
+seed:
+  primary: 20260827
+  kmeans: 42
+  neural_repeats: [20260827, 20260828, 20260829]
+  aps_randomization: 20260827
+  figure12_randomization: 20260827
+
+# The manuscript states that Table 7 uses 10 fixed seeds for stratified
+# 10/15/20/25% designs and 5 fixed seeds for contiguous-block 20% designs,
+# but it does not list those seed values. Do not invent them.
+table7:
+  stratified_repeats: 10
+  contiguous_block_repeats: 5
+  explicit_seed_list_available: false
+
+# Framework-level deterministic controls. These are implementation controls,
+# not manuscript results.
+determinism:
+  torch_deterministic: true
+  cudnn_benchmark: false
+  cudnn_deterministic: true

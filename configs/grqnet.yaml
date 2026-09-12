@@ -1,0 +1,40 @@
+grqnet:
+  group_input_dimensions: [5, 18, 2, 25]
+  d_group: 48
+  d_reweight_hidden: 32
+  n_gated_residual_blocks: 4
+  fused_dimension: 192
+  dropout: 0.12
+  dropout_locations: [group_encoders, gated_residual_blocks, classification_head]
+  classification_head: [192, 64, 3]
+  group_weights:
+    activation: sigmoid
+    independent: true
+    normalized_to_sum_one: false
+    exported_auxiliary_output: true
+  expected_trainable_parameters: 319815
+  architecture_selection: fixed_a_priori_before_present_data
+
+training:
+  loss:
+    type: class_weighted_cross_entropy
+    class_weights: inverse_class_frequency
+    label_smoothing: 0.05
+  optimizer:
+    type: AdamW
+    learning_rate: 8.0e-4
+    weight_decay: 5.0e-3
+  batch_size: 48
+  scheduler:
+    type: CosineAnnealingWarmRestarts
+    T_0: 30
+    T_mult: 2
+  max_epochs: 200
+  gradient_clip_max_norm: 1.0
+  early_stopping:
+    monitor: macro_f1
+    patience: 30
+    internal_fraction: 0.15
+    rounding: ceil
+    retain_best_checkpoint: true
+    refit_on_full_training_subset: false

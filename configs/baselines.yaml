@@ -1,0 +1,101 @@
+neural_baselines:
+  mlp:
+    hidden_dims:
+    - 128
+    - 96
+    - 64
+    activation: relu
+    dropout: 0.3
+    trainable_parameters: 25315
+  lstm:
+    tokenization: 50_scalar_tokens
+    hidden_size: 64
+    n_layers: 2
+    dropout: 0.3
+    representation: last_step_hidden_state
+    trainable_parameters: 50627
+  transformer:
+    tokenization: 50_scalar_tokens
+    d_model: 64
+    n_heads: 4
+    n_encoder_layers: 3
+    d_ff: 256
+    positional_embedding: learned
+    pooling: mean
+    trainable_parameters: 153475
+    dropout: 0.1
+    dropout_source: PyTorch TransformerEncoderLayer default; not numerically stated
+      in manuscript
+  tabnet:
+    n_steps: 4
+    n_a: 32
+    n_d: 32
+    relaxation: 1.5
+    trainable_parameters: 108728
+    library_defaults: {}
+    library_default_note: Low-level pytorch-tabnet defaults beyond Table 3(a) are
+      not numerically stated in manuscript.
+  shared_training_protocol: configs/grqnet.yaml::training
+non_neural_baselines:
+  lightgbm:
+    table3a_final:
+      n_estimators: 500
+      max_depth: 6
+      learning_rate: 0.05
+      bagging_freq: 0
+    tuning: optuna_50_trials_per_outer_fold
+  multinomial_logistic_regression:
+    table3a_final:
+      C: 0.1
+      penalty: l2
+      class_weight: balanced
+    tuning: grid_4_configurations_per_outer_fold
+  random_forest:
+    table3a_final:
+      n_estimators: 500
+      max_depth: 12
+      max_features: 0.3
+      class_weight: balanced
+    tuning: grid_18_configurations_per_outer_fold
+  xgboost:
+    table3a_final:
+      n_estimators: 463
+      max_depth: 4
+      learning_rate: 0.037
+      subsample: 0.83
+      colsample_bytree: 0.78
+      min_child_weight: 4
+      gamma: 0.06
+      reg_alpha: 0.018
+      reg_lambda: 1.62
+    tuning: optuna_50_trials_per_outer_fold
+  catboost:
+    table3a_final:
+      iterations: 580
+      depth: 6
+      learning_rate: 0.041
+      l2_leaf_reg: 4.7
+      random_strength: 0.42
+      bagging_temperature: 0.63
+      border_count: 128
+      class_weights: balanced
+    tuning: optuna_50_trials_per_outer_fold
+ablation:
+  table5_feature_configurations:
+  - A
+  - A+B
+  - A+B+C
+  - A+B+D
+  - A+C+D
+  - A+B+C+D
+  gbm_tuned_separately_within_each_outer_fold: true
+  grqnet_missing_group_strategy: subset_reinstantiate
+  note: Omitted semantic groups and their encoders are removed; GRQ-Net is re-instantiated
+    with the active groups only, while all remaining architecture/training settings are unchanged.
+non_neural_protocol:
+  selection_split: internal_15_percent_stratified
+  selection_metric: macro_f1
+  outer_fold_refit_after_selection: implementation_choice_full_outer_training
+  outer_fold_refit_note: Outer-fold refit after HPO is not explicitly stated in the
+    manuscript; final 712-row refit is explicit.
+  final_refit_after_selection: true

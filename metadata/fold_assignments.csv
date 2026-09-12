@@ -1,0 +1,6 @@
+fold,validation_well,validation_n,outer_training_n,early_stopping_n,gradient_training_n,calibration_n,calibration_H,calibration_M,calibration_L
+1,WF1,128,584,88,496,32,8,9,15
+2,CS12,114,598,90,508,28,9,9,10
+3,CS602,206,506,76,430,52,16,12,24
+4,CS607,125,587,89,498,31,8,9,14
+5,CS11,139,573,86,487,35,10,10,15

@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools==70.0.0", "wheel==0.43.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "volcanic-cp-grqnet"
+version = "1.1.0.dev1"
+description = "Public implementation of a UFT + GRQ-Net + conformal-prediction workflow"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.10,<3.12"
+keywords = [
+    "conformal-prediction",
+    "uncertainty-quantification",
+    "reservoir-quality",
+    "volcanic-reservoir",
+    "logging-while-drilling",
+    "deep-learning",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --tb=short"

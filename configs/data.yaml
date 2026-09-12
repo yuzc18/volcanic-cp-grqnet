@@ -1,0 +1,82 @@
+# Data roles and manuscript-level counts. No proprietary measurements are
+# stored in this repository.
+grid:
+  spacing_m: 0.125
+
+columns:
+  well: well_id
+  depth: depth_m
+  sample_id: sample_id
+  raw_logs: [GR, CNL, DEN, AC, RLA5]
+  porosity_pct: porosity_pct
+  permeability_md: permeability_mD
+  lithology_label: lithology_class_id
+
+roles:
+  development_wells: [WF1, CS12, CS602, CS607, CS11]
+  blind_wells: [CS9, CS10]
+
+counts:
+  total_core_matched: 1259
+  development_total: 890
+  blind_total: 369
+  main_calibration: 178
+  downstream_modeling: 712
+  main_calibration_class_counts:
+    High: 51
+    Medium: 49
+    Low: 78
+  main_calibration_per_well:
+    WF1: 32
+    CS12: 28
+    CS602: 52
+    CS607: 31
+    CS11: 35
+  # Table 3(b): exact within-well class-stratified calibration quotas.
+  # These counts define the selection procedure; proprietary sample IDs are
+  # not distributed or reconstructed.
+  main_calibration_per_well_class:
+    WF1: {High: 8, Medium: 9, Low: 15}
+    CS12: {High: 9, Medium: 9, Low: 10}
+    CS602: {High: 16, Medium: 12, Low: 24}
+    CS607: {High: 8, Medium: 9, Low: 14}
+    CS11: {High: 10, Medium: 10, Low: 15}
+
+outer_folds:
+  - fold: 1
+    validation_well: WF1
+    validation_n: 128
+    outer_training_n: 584
+    early_stopping_n: 88
+    gradient_training_n: 496
+  - fold: 2
+    validation_well: CS12
+    validation_n: 114
+    outer_training_n: 598
+    early_stopping_n: 90
+    gradient_training_n: 508
+  - fold: 3
+    validation_well: CS602
+    validation_n: 206
+    outer_training_n: 506
+    early_stopping_n: 76
+    gradient_training_n: 430
+  - fold: 4
+    validation_well: CS607
+    validation_n: 125
+    outer_training_n: 587
+    early_stopping_n: 89
+    gradient_training_n: 498
+  - fold: 5
+    validation_well: CS11
+    validation_n: 139
+    outer_training_n: 573
+    early_stopping_n: 86
+    gradient_training_n: 487
+
+final_neural_fit:
+  downstream_total: 712
+  early_stopping_fraction: 0.15
+  early_stopping_rounding: ceil
+  early_stopping_n: 107
+  gradient_training_n: 605

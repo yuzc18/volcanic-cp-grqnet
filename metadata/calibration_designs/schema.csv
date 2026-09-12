@@ -1,0 +1,7 @@
+column,description
+sample_uid,Sample identifier matching core_samples.csv sample_id
+design,Calibration-design name
+repeat_seed,Fixed repeat seed used by the public implementation
+is_calibration,Boolean indicator that this row belongs to the calibration subset
+calibration_well,Whole-well calibration well when applicable; blank otherwise
+evaluation_wells,Blind-well evaluation target(s), pipe-delimited
