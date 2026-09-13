@@ -19,6 +19,7 @@ manuscript values.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 import numpy as np
@@ -92,25 +93,84 @@ def aps_nonconformity_scores(
     return scores
 
 
+class InsufficientCalibrationError(ValueError):
+    """Raised when ``ceil((n+1)(1-alpha))`` exceeds the calibration size.
+
+    The split-conformal threshold is the ``ceil((n+1)(1-alpha))``-th ordered
+    calibration score.  When that rank is ``n+1`` the finite-sample construction
+    calls for an infinite threshold, i.e. the trivial full-label set; silently
+    clipping the rank to ``n`` would return an ordinary score while still
+    advertising the usual finite-sample coverage statement.
+
+    The manuscript designs never reach this branch: the primary analysis uses
+    ``n=178`` over ``alpha=0.01..0.30`` and the smallest Table 7 design uses
+    ``n=89`` at ``alpha=0.05``.
+    """
+
+    def __init__(self, n: int, alpha: float, required_rank: int):
+        self.n = int(n)
+        self.alpha = float(alpha)
+        self.required_rank = int(required_rank)
+        super().__init__(
+            f"alpha={alpha:g} with n={n} calibration scores requires the "
+            f"{required_rank}-th ordered score, but only {n} are available. "
+            f"The finite-sample threshold is infinite here (the trivial "
+            f"full-label set). This alpha needs at least "
+            f"n={math.ceil(1.0 / alpha) - 1} calibration samples; otherwise raise "
+            f"alpha, or request the conservative full-label branch explicitly "
+            f"with on_insufficient_calibration='full_set'."
+        )
+
+
 def finite_sample_order_statistic(n: int, alpha: float) -> int:
     """Return the 1-based finite-sample order statistic index.
 
     For the manuscript primary design, ``n=178`` and ``alpha=0.05`` give 171.
-    If the nominal order exceeds ``n`` (very small alpha), it is capped at n.
+
+    Raises
+    ------
+    InsufficientCalibrationError
+        If the required rank exceeds ``n``.  The rank is never silently clipped,
+        because a clipped rank does not carry the finite-sample guarantee.
     """
     if n <= 0:
         raise ValueError("n must be positive.")
     if not (0.0 < alpha < 1.0):
         raise ValueError("alpha must be in (0, 1).")
-    return min(int(np.ceil((n + 1) * (1.0 - alpha))), n)
+    kth = int(np.ceil((n + 1) * (1.0 - alpha)))
+    if kth > n:
+        raise InsufficientCalibrationError(n, alpha, kth)
+    return kth
 
 
-def compute_threshold(scores: np.ndarray, alpha: float) -> float:
-    """Return the exact finite-sample APS threshold as an ordered score."""
+def compute_threshold(
+    scores: np.ndarray,
+    alpha: float,
+    *,
+    on_insufficient_calibration: str = "error",
+) -> float:
+    """Return the exact finite-sample APS threshold as an ordered score.
+
+    Parameters
+    ----------
+    on_insufficient_calibration
+        ``"error"`` (default) raises :class:`InsufficientCalibrationError` when
+        ``ceil((n+1)(1-alpha)) > n``.  ``"full_set"`` instead returns
+        ``+inf``, the conservative threshold that makes every prediction set the
+        full label set; :func:`build_prediction_sets_detailed` accepts that
+        value.  No manuscript design reaches this branch.
+    """
+    if on_insufficient_calibration not in {"error", "full_set"}:
+        raise ValueError("on_insufficient_calibration must be 'error' or 'full_set'.")
     s = np.asarray(scores, dtype=float)
     if s.ndim != 1 or len(s) == 0 or not np.isfinite(s).all():
         raise ValueError("scores must be a non-empty finite 1-D array.")
-    kth = finite_sample_order_statistic(len(s), alpha)
+    try:
+        kth = finite_sample_order_statistic(len(s), alpha)
+    except InsufficientCalibrationError:
+        if on_insufficient_calibration == "full_set":
+            return float("inf")
+        raise
     return float(np.sort(s, kind="stable")[kth - 1])
 
 
@@ -140,8 +200,20 @@ def build_prediction_sets_detailed(
     """
     p = _validate_probabilities(probs)
     m, k = p.shape
+    if np.isnan(q_hat):
+        raise ValueError("q_hat must not be NaN.")
+    if np.isposinf(q_hat):
+        # Conservative finite-sample branch (see compute_threshold): every set
+        # is the full label set, so coverage is 1 by construction.
+        order_full = np.argsort(-p, axis=1, kind="stable")
+        return PredictionSetDetails(
+            sets=[[int(c) for c in order_full[i]] for i in range(m)],
+            sizes=np.full(m, k, dtype=np.int64),
+            boundary_removed=np.zeros(m, dtype=bool),
+            uniforms=np.zeros(m, dtype=float),
+        )
     if not np.isfinite(q_hat):
-        raise ValueError("q_hat must be finite.")
+        raise ValueError("q_hat must be finite or +inf.")
     u = _uniforms(m, rng=rng, uniforms=uniforms) if randomized else np.ones(m)
     order = np.argsort(-p, axis=1, kind="stable")
 

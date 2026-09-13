@@ -194,3 +194,21 @@ def setup_reproducibility(cfg: dict[str, Any]) -> None:
     """One-stop call: seed everything + enable determinism."""
     set_global_seed(cfg["seed"]["global"])
     enable_deterministic_mode(cfg["determinism"])
+
+
+def seed_before_model_construction(seed: int) -> None:
+    """Seed the RNGs that determine freshly constructed model weights.
+
+    ``torch.nn`` draws initial weights at construction time, so a seed set
+    inside a training function cannot retroactively change them.  Every entry
+    point must therefore call this immediately before instantiating a model, so
+    that the initial weights depend only on the requested seed and not on the
+    ambient random state or on how many other models ran first.
+
+    ``src.training.trainer.train_one_fold`` already seeds before building
+    GRQ-Net; this helper gives the baseline entry points the same guarantee.
+    """
+    np.random.seed(int(seed))
+    torch.manual_seed(int(seed))
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(int(seed))

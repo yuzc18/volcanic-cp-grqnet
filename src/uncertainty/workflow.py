@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
 
 import numpy as np
@@ -17,6 +18,41 @@ from src.uncertainty.conformal import (
 
 
 PROB_COLS = ["prob_High", "prob_Medium", "prob_Low"]
+
+#: Name of the deployment (blind-well) conformal analysis unit.  Every entry
+#: point that calibrates the deployment threshold must use this name so that all
+#: of them draw the same uniforms.
+DEPLOYMENT_UNIT = "deployment_blind"
+
+
+def fold_unit(fold_id: int) -> str:
+    """Name of the conformal analysis unit for one outer cross-validation fold."""
+    return f"outer_fold_{int(fold_id)}"
+
+
+def conformal_substream(seed: int, unit: str) -> np.random.Generator:
+    """Return the randomized-APS generator for one named analysis unit.
+
+    Each analysis unit -- the five outer folds and the deployment blind-well
+    evaluation -- gets its own generator derived from ``(seed, unit)``.  The
+    uniforms an analysis unit consumes therefore depend only on the seed and on
+    the unit's name, not on how many other units were evaluated first.
+
+    This matters because the deployment threshold is reachable from two entry
+    points: ``run_main_conformal`` (which also evaluates the five folds) and
+    ``scripts/eval_blind.py`` (which evaluates the blind wells alone).  A single
+    sequential stream made those two entry points consume different uniforms and
+    therefore report different q-hat values and prediction sets for identical
+    probabilities.  Naming the streams removes that dependence: both entry
+    points now call ``conformal_substream(seed, DEPLOYMENT_UNIT)``.
+
+    The unit name is hashed with SHA-256 rather than :func:`hash`, whose salt
+    varies between interpreter runs.
+    """
+    digest = hashlib.sha256(unit.encode("utf-8")).digest()[:8]
+    return np.random.default_rng(
+        np.random.SeedSequence([int(seed), int.from_bytes(digest, "big")])
+    )
 
 
 @dataclass(frozen=True)
@@ -100,21 +136,29 @@ def run_main_conformal(
 ) -> MainConformalRun:
     """Apply fold-specific q-hat values and the final deployment q-hat.
 
-    One NumPy ``default_rng(seed)`` stream supplies every randomized calibration
-    score and prediction-boundary step, in manuscript fold order followed by the
-    final blind-well evaluation.
+    Every analysis unit draws its randomized calibration and prediction-boundary
+    uniforms from its own named substream of ``seed`` (see
+    :func:`conformal_substream`), so a unit's result does not depend on which
+    other units ran before it.  ``scripts/eval_blind.py`` reuses the deployment
+    substream and therefore reproduces ``blind_result`` exactly.
     """
-    rng = np.random.default_rng(seed)
     fold_apps: list[APSApplication] = []
     for run in folds:
+        fold_id = int(run.prepared.fold.fold_id)
         app = apply_randomized_aps(
-            run.calibration_frame, run.oof_frame, alpha=alpha, rng=rng
+            run.calibration_frame,
+            run.oof_frame,
+            alpha=alpha,
+            rng=conformal_substream(seed, fold_unit(fold_id)),
         )
-        app.frame["fold"] = int(run.prepared.fold.fold_id)
+        app.frame["fold"] = fold_id
         fold_apps.append(app)
     oof = pd.concat([x.frame for x in fold_apps], ignore_index=True)
     blind = apply_randomized_aps(
-        final.calibration_frame, final.blind_frame, alpha=alpha, rng=rng
+        final.calibration_frame,
+        final.blind_frame,
+        alpha=alpha,
+        rng=conformal_substream(seed, DEPLOYMENT_UNIT),
     )
     return MainConformalRun(
         fold_results=tuple(fold_apps), oof_frame=oof, blind_result=blind

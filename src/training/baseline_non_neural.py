@@ -113,6 +113,7 @@ def tune_non_neural(
     refit_X: np.ndarray | None = None,
     refit_y: np.ndarray | None = None,
     smoke: bool = False,
+    n_classes: int = 3,
 ) -> SelectionResult:
     entry = _require_space(name, protocol)
     engine = entry["engine"]
@@ -124,7 +125,7 @@ def tune_non_neural(
         best_score, best_params = -1.0, None
         for params in grid:
             fit_params = _with_smoke_overrides(params, smoke)
-            model = build_non_neural_estimator(name, fit_params, seed=seed)
+            model = build_non_neural_estimator(name, fit_params, seed=seed, n_classes=n_classes)
             model.fit(X_gradient, y_gradient)
             score = float(f1_score(y_internal, np.asarray(model.predict(X_internal)).reshape(-1), average="macro"))
             if score > best_score:
@@ -137,7 +138,7 @@ def tune_non_neural(
         def objective(trial):
             params = {spec["name"]: _suggest(trial, spec) for spec in specs}
             fit_params = _with_smoke_overrides(params, smoke)
-            model = build_non_neural_estimator(name, fit_params, seed=seed)
+            model = build_non_neural_estimator(name, fit_params, seed=seed, n_classes=n_classes)
             model.fit(X_gradient, y_gradient)
             return float(f1_score(y_internal, np.asarray(model.predict(X_internal)).reshape(-1), average="macro"))
         n_trials = 2 if smoke else int(entry["trials_per_outer_fold"])
@@ -145,7 +146,9 @@ def tune_non_neural(
         best_score, best_params = float(study.best_value), dict(study.best_params)
     else:
         raise ValueError(engine)
-    model = build_non_neural_estimator(name, _with_smoke_overrides(best_params, smoke), seed=seed)
+    model = build_non_neural_estimator(
+        name, _with_smoke_overrides(best_params, smoke), seed=seed, n_classes=n_classes
+    )
     fitX = X_gradient if refit_X is None else refit_X
     fity = y_gradient if refit_y is None else refit_y
     model.fit(fitX, fity)

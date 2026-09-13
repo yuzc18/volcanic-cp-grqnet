@@ -2,8 +2,15 @@
 
 The manuscript specifies the design families and total calibration sizes. This
 module applies those published selection procedures to supplied data and records
-the resulting sample IDs for each run. The public repository also ships an
-anonymized, measurement-free main-split manifest for structural audit.
+the resulting sample IDs for each run.
+
+Those recorded IDs belong to the data supplied to the run -- synthetic inputs, or
+the user's own -- and are written to that run's output directory. The repository
+itself ships no row-level split manifest: the published metadata are the
+aggregate fold sizes and the well-by-class calibration quotas of Table 3(b)
+(``metadata/fold_assignments.csv``), plus a schema for an optional
+study-specific row mapping (``metadata/split_schema.csv``). The historical
+sample-level assignment of the 178 calibration rows is not included.
 """
 
 from __future__ import annotations

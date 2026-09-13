@@ -2,7 +2,9 @@
 
 The finalized manuscript is the specification for this repository.
 
-**Scientific implementation revision:** release tag `v1.0` of this repository, which is the single commit created from this release.
+**Scientific implementation revision:** release tag `v1.1` of this repository.
+
+`v1.1` adds the fixes made in response to the 2026-09-13 repository review (`CODE_REVIEW_RESPONSE.md`). The audited predecessor `v1.0` stays reachable but does not contain them.
 
 ## Implemented manuscript workflow
 
@@ -18,7 +20,9 @@ The finalized manuscript is the specification for this repository.
 
 ## Data boundary
 
-No proprietary measurement values, fitted study checkpoints, or study prediction tables are published. The public split manifest contains anonymized sample tokens and role assignments only, with no key back to proprietary measurements.
+No proprietary measurement values, fitted study checkpoints, or study prediction tables are published.
+
+Public split metadata report the fold sizes and well-by-class calibration quotas in Table 3(b). A schema is provided for optional study-specific row mappings; the historical sample-level split assignment is not included in this release. There is no row-level table of the 178 calibration sample identities in this repository, and none is reconstructed.
 
 ## Runnable demonstration
 

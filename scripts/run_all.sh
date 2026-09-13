@@ -15,7 +15,12 @@ python scripts/round3_protocol_smoke.py
 python scripts/round4_baseline_smoke.py
 python scripts/conformal_calibrate.py --smoke
 python scripts/run_table7_calibration_designs.py --smoke
-python scripts/run_round6_analysis.py --smoke
+# SHAP additivity is known to fail for GRQ-Net on the pinned SHAP/PyTorch
+# stack (see src/analysis/interpretability.py). 'record' keeps the demo
+# running and writes fig10_shap_additivity_diagnostic.csv; the manifest
+# then reports shap_additivity_verified=false. Do not read that output as
+# validated Figure-10 evidence.
+python scripts/run_round6_analysis.py --smoke --shap-additivity record
 pytest -q
 
 echo "============================================================"

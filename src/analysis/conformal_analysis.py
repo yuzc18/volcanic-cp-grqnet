@@ -70,7 +70,15 @@ def coverage_curve_from_folds(
     for j, alpha in enumerate(alphas):
         covered_all: list[np.ndarray] = []
         for scores, p_eval, y_eval, u_eval in cached:
-            q_hat = compute_threshold(scores, float(alpha))
+            # The 30-point grid starts at alpha=0.01, where ceil((n+1)(1-alpha))
+            # can exceed a small calibration set.  The finite-sample threshold
+            # is then infinite, i.e. the trivial full-label set, which is the
+            # correct conservative value for a coverage curve.  The manuscript
+            # designs never reach this branch: alpha=0.01 needs n>=99 and the
+            # primary calibration set has n=178.
+            q_hat = compute_threshold(
+                scores, float(alpha), on_insufficient_calibration="full_set"
+            )
             details = build_prediction_sets_detailed(
                 p_eval,
                 q_hat,

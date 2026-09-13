@@ -10,8 +10,8 @@
 
 **Program language:** Python
 
-**Program size:** approximately 465 KB as the uncompressed source tree (119 tracked files) and approximately 180 KB as the compressed release archive; exact values vary slightly with packaging metadata. `python scripts/release_audit.py` reports the tracked size of the current checkout.
+**Program size:** approximately 525 KB as the uncompressed source tree (122 tracked files) and approximately 180 KB as the compressed release archive; exact values vary slightly with packaging metadata. `python scripts/release_audit.py` reports the tracked size of the current checkout.
 
-**Availability:** Public MIT-licensed code is available at `https://github.com/yuzc18/volcanic-cp-grqnet`, release tag `v1.0`. The repository includes training/evaluation code, the machine-readable 50-feature dictionary, anonymized fold/calibration metadata, random-seed settings, executable per-fold hyperparameter-configuration export, full machine-readable search spaces, statistical and figure-generation code, a synthetic-data generator, and the latency benchmark. Proprietary well-log, core, and thin-section measurements are not included.
+**Availability:** Public MIT-licensed code is available at `https://github.com/yuzc18/volcanic-cp-grqnet`, release tag `v1.1`. The repository includes training/evaluation code, the machine-readable 50-feature dictionary, anonymized fold/calibration metadata, random-seed settings, executable per-fold hyperparameter-configuration export, full machine-readable search spaces, statistical and figure-generation code, a synthetic-data generator, and the latency benchmark. Proprietary well-log, core, and thin-section measurements are not included.
 
 **License:** MIT License

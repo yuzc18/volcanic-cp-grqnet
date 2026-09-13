@@ -8,6 +8,7 @@ from typing import Any
 import numpy as np
 import yaml
 
+from src.config import seed_before_model_construction
 from src.models.baselines import build_neural_baseline
 from src.pipeline import PreparedOuterFold
 from src.training.baseline_neural import evaluate_neural_baseline, train_neural_baseline
@@ -47,6 +48,10 @@ def run_neural_on_prepared(
     train_cfg: TrainConfig,
     seed: int,
 ) -> BaselineFoldResult:
+    # Initial weights are drawn during construction, so the seed must be set
+    # first; otherwise the ambient random state and the order in which models
+    # are run would change the initialization (see src/config.py).
+    seed_before_model_construction(seed)
     build = build_neural_baseline(name, baseline_cfg, input_dim=p.X_outer_train.shape[1])
     # Exact parameter-count checks are manuscript-facing for MLP/LSTM/Transformer.
     # TabNet is checked when the pinned external package is available.

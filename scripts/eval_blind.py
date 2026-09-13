@@ -7,14 +7,16 @@ import json
 import sys
 from pathlib import Path
 
-import numpy as np
-
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from scripts.generate_synthetic_data import write_synthetic_inputs  # noqa: E402
 from src.pipeline import RuntimeOptions, build_context, train_final_model  # noqa: E402
-from src.uncertainty.workflow import apply_randomized_aps  # noqa: E402
+from src.uncertainty.workflow import (  # noqa: E402
+    DEPLOYMENT_UNIT,
+    apply_randomized_aps,
+    conformal_substream,
+)
 
 
 def main() -> None:
@@ -42,11 +44,14 @@ def main() -> None:
         args.data_dir, cp_seed=args.seed, split_metadata_path=args.split_metadata
     )
     final = train_final_model(ctx, options=options)
+    # Same named substream as run_main_conformal's deployment step, so this
+    # standalone entry point reproduces the main analysis exactly for identical
+    # probabilities, sample identities and seed.
     app = apply_randomized_aps(
         final.calibration_frame,
         final.blind_frame,
         alpha=args.alpha,
-        rng=np.random.default_rng(args.seed),
+        rng=conformal_substream(args.seed, DEPLOYMENT_UNIT),
     )
     args.output_dir.mkdir(parents=True, exist_ok=True)
     app.frame.to_csv(args.output_dir / "blind_conformal_predictions.csv", index=False)

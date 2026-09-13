@@ -2,7 +2,10 @@
 
 Public code corresponding to the finalized manuscript.
 
-**Scientific implementation revision:** release tag `v1.0` of this repository. The release is a single commit; the manuscript cites that commit's SHA, which `v1.0` points to.
+**Scientific implementation revision:** release tag `v1.1` of this repository; the
+manuscript cites the SHA of the commit that `v1.1` points to. Tag `v1.0` is the
+earlier version audited by the 2026-09-13 repository review and is kept reachable
+for traceability; see `CODE_REVIEW_RESPONSE.md`.
 
 The manuscript is the specification. The code implements the workflow described there:
 five standard logging-while-drilling (LWD) curves are transformed into a 50-dimensional
@@ -27,8 +30,10 @@ The repository provides:
 The repository does **not** contain proprietary well-log, core, or thin-section measurements,
 measurement-bearing intermediate files, fitted study checkpoints, or study prediction tables.
 It does include anonymized, measurement-free fold/calibration metadata at the level reported in
-Table 3(b) (fold sizes and well-by-class calibration quotas), plus model-configuration
-records required by the finalized manuscript.
+Table 3(b) (fold sizes and well-by-class calibration quotas). The model-configuration
+material is the configuration files, the complete machine-readable search spaces and the
+runtime export interface that writes the configuration actually selected in a fresh run --
+not a record of the per-fold values selected during the original study.
 
 Synthetic outputs are demonstration values. They are not expected to reproduce the
 numerical results reported in the manuscript.
@@ -141,8 +146,14 @@ training-only Borderline-SMOTE, C4.5 gain-ratio splitting, and Kendall's-W featu
 guidance. The complete fitting pipeline includes z-score normalization and is refitted for
 each active split. The 18-class order is fixed in `configs/erf.yaml`.
 
-Implementation details not uniquely fixed by the cited eRF publication are pinned and
-documented in `configs/erf.yaml` and `UPSTREAM_ERF_NOTE.md` so the published specification is runnable.
+Group B in this repository is a **public re-implementation of the published eRF
+specification, written for release**; it was not recovered from the environment that
+produced the manuscript's Group B probabilities, and the correspondence between the two
+has not been established. Implementation details not uniquely fixed by the cited eRF
+publication are pinned so the specification is runnable, and those pinned values are
+release choices rather than recovered historical settings. `UPSTREAM_ERF_NOTE.md`
+separates the published algorithm, this release, and the original study, and describes
+how the Kendall-W stability mechanism is realised here.
 
 ### Group C: petrophysical proxies
 
@@ -242,11 +253,37 @@ The repository implements:
 - 0.5 m / 1.0 m two-start greedy thinning without retraining;
 - the 30-point `alpha=0.01...0.30` ACE analysis;
 - Figure 12 random ranking with `R=200` and `B=1000` paired block-bootstrap replicates;
-- fold-wise DeepExplainer SHAP on model logits with 100 training-background samples;
+- fold-wise DeepExplainer SHAP on model logits with 100 training-background samples,
+  with the additivity residual measured on every fold (see the caveat below);
 - the six-stage batch-one CPU benchmark using the strictly causal Group D variant.
 
 All figure annotations are computed from supplied predictions. Manuscript result values are
 not inserted into plotting code to force agreement.
+
+### SHAP additivity caveat
+
+With the pinned stack (SHAP 0.45.1, PyTorch 2.3.1), DeepExplainer attributions for
+GRQ-Net do **not** satisfy additivity: SHAP has no DeepLIFT rule for `nn.GELU` or
+`nn.LayerNorm`, and its `nn.Module` hooks do not see the functional `F.relu` and
+`torch.sigmoid` calls inside the group-attention and gated-residual blocks.
+
+`compute_foldwise_shap` measures the residual on every fold and refuses by default to
+return attributions that fail it; `scripts/run_round6_analysis.py` always writes
+`fig10_shap_additivity_diagnostic.csv` and reports `shap_additivity_verified`
+separately from `shap_completed`. Pass `--shap-additivity record` to obtain the values
+together with the failing diagnostic for inspection. **A completed run is not evidence
+that an explanation is valid.** See `CODE_REVIEW_RESPONSE.md` for the isolating control
+models.
+
+### Group D variant comparison
+
+Section 4.3 compares the centered Group D window with the strictly causal variant.
+Both arms rebuild Group D, refit the preprocessing and retrain GRQ-Net on the same
+folds and seed:
+
+```bash
+python scripts/run_group_d_variant_comparison.py --output-dir outputs/group_d_variant
+```
 
 ## Paper-to-code map
 
@@ -261,6 +298,7 @@ not inserted into plotting code to force agreement.
 | Table 5 | `src/analysis/ablation.py`; `scripts/run_ablation.py` | ablation JSON/CSV |
 | Table 6(a) | `src/models/baselines.py`; `scripts/run_baselines.py` | OOF predictions/metrics |
 | Table 6(b) | `src/analysis/benchmark.py`; `benchmark/run_latency.py` | latency JSON |
+| Causal Group D comparison (Sec. 4.3) | `scripts/run_group_d_variant_comparison.py` | per-fold centered vs causal macro-F1 |
 | Table 7 | `src/uncertainty/calibration_designs.py`; `scripts/run_table7_calibration_designs.py` | calibration-design summaries |
 | Table 8(a,b) | `src/analysis/label_sensitivity.py`; `scripts/run_label_sensitivity.py` | Table 8 CSVs |
 | Table 9(a,b) | `scripts/eval_blind.py`; `src/analysis/tables.py` | classification/coverage CSVs |
@@ -268,7 +306,7 @@ not inserted into plotting code to force agreement.
 | Fig. 7 | `scripts/fig_07_confusion.py` | confusion matrices |
 | Fig. 8 | `scripts/fig_08_conformal.py` | calibration/set-size figure |
 | Fig. 9 | `scripts/fig_09_blind_profile.py` | CS9 profile |
-| Fig. 10 | `scripts/fig_10_interpretability.py` | SHAP/group-weight figure |
+| Fig. 10 | `scripts/fig_10_interpretability.py` | SHAP/group-weight figure (see the additivity caveat below) |
 | Fig. 11 | `scripts/fig_11_fzi_sets.py` | FZI/set-size figure |
 | Fig. 12 | `scripts/fig_12_verification_budget.py` | verification-budget curves |
 
@@ -286,8 +324,10 @@ Paper-facing release coordinates:
 
 ```text
 Repository: https://github.com/yuzc18/volcanic-cp-grqnet
-Scientific revision: tag v1.0
+Scientific revision: tag v1.1
 License: MIT
 ```
 
-See `CODE_AVAILABILITY.md` for the manuscript-facing release description.
+See `CODE_AVAILABILITY.md` for the manuscript-facing release description, and
+`CODE_REVIEW_RESPONSE.md` for the changes made in response to the 2026-09-13
+repository review, including the items that remain open.

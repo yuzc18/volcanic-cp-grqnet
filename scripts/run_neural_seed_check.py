@@ -19,6 +19,7 @@ sys.path.insert(0, str(ROOT))
 import yaml
 
 from scripts.generate_synthetic_data import write_synthetic_inputs  # noqa: E402
+from src.config import seed_before_model_construction  # noqa: E402
 from src.models.baselines import build_neural_baseline  # noqa: E402
 from src.pipeline import RuntimeOptions, build_context, prepare_outer_fold  # noqa: E402
 from src.training.baseline_neural import evaluate_neural_baseline, train_neural_baseline  # noqa: E402
@@ -69,6 +70,7 @@ def main():
                     pred = predict_grqnet(fit.model, p.X_outer_val)
                     metrics.append(compute_metrics(p.y_outer_val, pred.predictions))
                 else:
+                    seed_before_model_construction(int(seed))
                     build = build_neural_baseline(name, bcfg)
                     fit = train_neural_baseline(
                         build.model,

@@ -86,6 +86,19 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=20260827)
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--skip-shap", action="store_true")
+    ap.add_argument(
+        "--shap-additivity",
+        choices=["error", "record"],
+        default="error",
+        help=(
+            "How to handle a failed SHAP additivity check. 'error' (default) "
+            "aborts rather than writing attributions that do not reproduce the "
+            "model logits. 'record' writes them together with the failing "
+            "residuals; the manifest then marks the explanation as not "
+            "additivity-verified, and such output must not be reported as "
+            "Figure-10 evidence."
+        ),
+    )
     ap.add_argument("--skip-benchmark", action="store_true")
     args = ap.parse_args()
 
@@ -170,12 +183,19 @@ def main() -> None:
     (out / "statistical_checks.json").write_text(json.dumps(stats, indent=2), encoding="utf-8")
 
     shap_done = False
+    shap_additivity_passed = None
     if not args.skip_shap:
         shap_summary = compute_foldwise_shap(
             folds,
             background_size=5 if args.smoke else 100,
             seed=args.seed,
             max_eval_rows_per_fold=2 if args.smoke else None,
+            on_additivity_failure=args.shap_additivity,
+        )
+        shap_additivity_passed = bool(shap_summary.additivity_passed)
+        # Always publish the diagnostic next to the attributions.
+        shap_summary.additivity_frame().to_csv(
+            out / "fig10_shap_additivity_diagnostic.csv", index=False
         )
         shap_summary.feature_importance.to_csv(out / "fig10_feature_shap.csv", index=False)
         shap_summary.group_importance.to_csv(out / "fig10_group_shap.csv", index=False)
@@ -187,6 +207,12 @@ def main() -> None:
             output=figures / "Fig10_interpretability.png",
         )
         shap_done = True
+        if not shap_additivity_passed:
+            print(
+                "WARNING: SHAP attributions did NOT pass the additivity check; "
+                "see fig10_shap_additivity_diagnostic.csv. They are written for "
+                "inspection only and are not valid Figure-10 evidence."
+            )
 
     benchmark_done = False
     if not args.skip_benchmark:
@@ -219,6 +245,9 @@ def main() -> None:
         "figures_generated": ["6", "8", "9", "11", "12"] + (["10"] if shap_done else []),
         "figure7_requires_baseline_oof_predictions": True,
         "shap_completed": shap_done,
+        # "completed" only means the script ran. Validity is the additivity flag.
+        "shap_additivity_verified": shap_additivity_passed,
+        "shap_explainer": "shap.DeepExplainer" if shap_done else None,
         "benchmark_completed": benchmark_done,
         "bootstrap_replicates": n_boot,
     }

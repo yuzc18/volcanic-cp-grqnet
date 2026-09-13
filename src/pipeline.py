@@ -66,6 +66,25 @@ class RuntimeOptions:
     xgb_n_estimators: int = 300
     max_lith_rows_per_class: int | None = None
     max_epochs: int = 200
+    #: Group D window definition, ``"centered"`` (Table 2(b), used for every
+    #: headline result) or ``"causal"`` (the strictly causal variant of
+    #: Section 3.3, which needs no future log sample).  Selecting ``"causal"``
+    #: rebuilds the Group D block, the preprocessing fitted on it and the
+    #: classifier, so it drives the like-for-like accuracy comparison reported
+    #: in the manuscript rather than only the latency measurement.
+    group_d_variant: str = "centered"
+
+    def __post_init__(self) -> None:
+        if self.group_d_variant not in {"centered", "causal"}:
+            raise ValueError(
+                f"group_d_variant must be 'centered' or 'causal', "
+                f"got {self.group_d_variant!r}."
+            )
+
+    @property
+    def group_d_causal(self) -> bool:
+        """True when Group D uses the strictly causal trailing-window variant."""
+        return self.group_d_variant == "causal"
 
     @property
     def xgb_overrides(self) -> dict:
@@ -334,7 +353,7 @@ def prepare_outer_fold(
     # A/D clipping + D context use only outer-training fitted limits.
     clipper = RawLogClipper().fit(outer_train)
     d_cont = build_group_d_continuous(
-        context.inputs.continuous_logs, clipper=clipper, causal=False
+        context.inputs.continuous_logs, clipper=clipper, causal=options.group_d_causal
     )
     D_train = _matched_group_d(outer_train, d_cont)
     D_val = _matched_group_d(outer_val, d_cont)
@@ -480,7 +499,7 @@ def prepare_final_model(
 
     clipper = RawLogClipper().fit(modeling)
     d_cont = build_group_d_continuous(
-        context.inputs.continuous_logs, clipper=clipper, causal=False
+        context.inputs.continuous_logs, clipper=clipper, causal=options.group_d_causal
     )
     D_train = _matched_group_d(modeling, d_cont)
     D_cal = _matched_group_d(calibration, d_cont)
